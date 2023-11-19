@@ -22,38 +22,41 @@ const Cart = () => {
 
   const handlePayment = async () => {
     try {
-      if (user.email) {
-        const stripePromise = await loadStripe(process.env.REACT_APP_STRIPE_PUBLIC_KEY);
-  
-        const res = await fetch(`${process.env.REACT_APP_SERVER_DOMIN}/create-checkout-session`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(productCartItem),
-        });
-  
-        if (res.status === 500) {
-          console.error("Server error");
-          // Handle server error, show an error message, etc.
-          return;
-        }
-  
-        const data = await res.json();
-        console.log(data);
-  
-        if (data.sessionId) {
-          toast("Redirect to payment Gateway...!");
-          await stripePromise.redirectToCheckout({ sessionId: data.sessionId });
-        } else {
-          console.error("Invalid sessionId in server response");
-          // Handle the case where the server response is missing the sessionId
-        }
-      } else {
-        toast("You have not Logged in!");
+      if (!user.email) {
+        toast("You are not logged in!");
         setTimeout(() => {
           navigate("/login");
         }, 1000);
+        return;
+      }
+  
+      const stripePromise = await loadStripe(process.env.REACT_APP_STRIPE_PUBLIC_KEY);
+  
+      const response = await fetch(`${process.env.REACT_APP_SERVER_DOMIN}/create-checkout-session`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(productCartItem),
+      });
+  
+      if (!response.ok) {
+        console.error("Server error:", response.statusText);
+        // Handle server error, show an error message, etc.
+        return;
+      }
+  
+      const data = await response.json();
+      console.log("Server Response:", data);
+  
+      if (data.sessionId) {
+        toast("Redirecting to payment gateway...");
+        await stripePromise.redirectToCheckout({ sessionId: data.sessionId });
+      } else {
+        console.error("Invalid sessionId in server response");
+        // Handle the case where the server response is missing the sessionId
+        toast("Error: Unable to initiate payment. Please try again.");
+        // You might want to display a user-friendly error message
       }
     } catch (error) {
       console.error("Error during payment:", error);
@@ -61,6 +64,7 @@ const Cart = () => {
       // You might also want to log the error for further investigation
     }
   };
+  
   
   
   

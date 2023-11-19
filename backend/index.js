@@ -143,7 +143,7 @@ app.post("/create-checkout-session",async(req,res)=>{
           line_items : req.body.map((item)=>{
             return{
               price_data : {
-                currency : "inr",
+                currency : "kes",
                 product_data : {
                   name : item.name,
                   // images : [item.image]
@@ -161,12 +161,16 @@ app.post("/create-checkout-session",async(req,res)=>{
           success_url : `${process.env.FRONTEND_URL}/success`,
           cancel_url : `${process.env.FRONTEND_URL}/cancel`,
 
-      }
+      };
+
+      console.log("Stripe Checkout Params:", params);
 
       
       const session = await stripe.checkout.sessions.create(params)
+
+      console.log("Stripe Checkout Session ID:", session.id);
       // console.log(session)
-      res.status(200).json(session.id)
+      res.status(200).json({ sessionId: session.id });
      }
      catch (err){
         res.status(err.statusCode || 500).json(err.message)
