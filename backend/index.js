@@ -6,7 +6,7 @@ const Stripe = require('stripe')
 
 const app = express();
 app.use(cors());
-app.use(express.json({ limit: "10mb" }));
+app.use(express.json({ limit: "20mb" }));
 
 const PORT = process.env.PORT || 8080;
 
@@ -125,7 +125,7 @@ app.get("/product",async(req,res)=>{
 })
  
 /*****payment getWay */
-console.log(process.env.STRIPE_SECRET_KEY)
+// console.log(process.env.STRIPE_SECRET_KEY)
 
 
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
